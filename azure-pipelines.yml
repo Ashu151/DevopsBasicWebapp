@@ -1,11 +1,11 @@
 trigger:
-  - none
+  - master
 
 pool:
   name: 'Default'  # Use your self-hosted agent pool
 
 steps:
-  # Step : Build with Maven using the specified JDK
+  # Step: Build with Maven using the specified JDK
   - task: Maven@3
     inputs:
       mavenPomFile: 'pom.xml'
@@ -13,3 +13,16 @@ steps:
       publishJUnitResults: true
       testResultsFiles: '**/surefire-reports/TEST-*.xml'
       goals: 'package'
+
+  # Step: Copy .war files
+  - task: CopyFiles@2
+    inputs:
+      Contents: '**/*.war'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  # Step: Publish build artifacts
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'warfile'
+      publishLocation: 'Container'
